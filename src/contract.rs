@@ -6,7 +6,7 @@ use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Vec
 pub enum DataKey {
     Admin,
     Init,
-    Balance,
+    Balance(Address),
 }
 
 #[derive(Clone)]
@@ -59,7 +59,7 @@ impl ClaimableBalanceContract {
         if let Some(old_balance) = env
             .storage()
             .persistent()
-            .get::<DataKey, ClaimableBalance>(&DataKey::Balance)
+            .get::<DataKey, ClaimableBalance>(&DataKey::Balance(token.clone()))
         {
             env.storage()
                 .instance()
@@ -70,7 +70,7 @@ impl ClaimableBalanceContract {
             claimants.append(&old_balance.claimants);
 
             env.storage().instance().set(
-                &DataKey::Balance,
+                &DataKey::Balance(token.clone()),
                 &ClaimableBalance {
                     token,
                     total_amount: amount + old_balance.total_amount,
@@ -79,7 +79,7 @@ impl ClaimableBalanceContract {
             );
         } else {
             env.storage().instance().set(
-                &DataKey::Balance,
+                &DataKey::Balance(token.clone()),
                 &ClaimableBalance {
                     token,
                     total_amount: amount,
@@ -89,23 +89,26 @@ impl ClaimableBalanceContract {
         }
     }
 
-    pub fn claim(env: Env, sender: Address) {
+    pub fn claim(env: Env, sender: Address, token: Address) {
         sender.require_auth();
         env.storage()
             .instance()
             .extend_ttl(INSTANCE_RENEWAL_THRESHOLD, INSTANCE_TARGET_TTL);
-        let mut claimable_balance: ClaimableBalance =
-            env.storage().instance().get(&DataKey::Balance).unwrap();
+        let mut claimable_balance: ClaimableBalance = env
+            .storage()
+            .instance()
+            .get(&DataKey::Balance(token.clone()))
+            .unwrap();
 
         let (id, amount) = {
-            let mut maybe = None;
+            let mut valid = None;
             for (idx, c) in claimable_balance.claimants.iter().enumerate() {
                 if sender == c.claimant {
-                    maybe = Some((idx, c.amount));
+                    valid = Some((idx, c.amount));
                     break;
                 }
             }
-            maybe.expect("no matching claimant found")
+            valid.expect("no matching claimant found")
         };
         token::Client::new(&env, &claimable_balance.token).transfer(
             &env.current_contract_address(),
@@ -121,7 +124,7 @@ impl ClaimableBalanceContract {
 
         env.storage()
             .instance()
-            .set(&DataKey::Balance, &claimable_balance);
+            .set(&DataKey::Balance(token), &claimable_balance);
     }
 }
 
