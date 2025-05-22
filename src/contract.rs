@@ -9,7 +9,7 @@ pub enum DataKey {
     Balance(Address),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 #[contracttype]
 pub struct ClaimableBalance {
     pub token: Address,
@@ -17,7 +17,7 @@ pub struct ClaimableBalance {
     pub claimants: Vec<Claimant>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 #[contracttype]
 pub struct Claimant {
     pub amount: i128,
@@ -58,7 +58,7 @@ impl ClaimableBalanceContract {
 
         if let Some(old_balance) = env
             .storage()
-            .persistent()
+            .instance()
             .get::<DataKey, ClaimableBalance>(&DataKey::Balance(token.clone()))
         {
             env.storage()
