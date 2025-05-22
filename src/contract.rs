@@ -9,7 +9,7 @@ pub enum DataKey {
     Balance(Address),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 #[contracttype]
 pub struct ClaimableBalance {
     pub token: Address,
@@ -121,11 +121,17 @@ impl ClaimableBalanceContract {
         claimants.remove(id as u32).unwrap();
 
         claimable_balance.claimants = claimants;
+        claimable_balance.total_amount -= amount;
 
         env.storage()
             .instance()
             .set(&DataKey::Balance(token), &claimable_balance);
     }
-}
 
-// mod test;
+    pub fn query_list(env: Env, token: Address) -> ClaimableBalance {
+        env.storage()
+            .instance()
+            .get(&DataKey::Balance(token.clone()))
+            .unwrap()
+    }
+}

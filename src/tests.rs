@@ -1,7 +1,9 @@
 #![cfg(test)]
 extern crate std;
 
-use crate::contract::{ClaimableBalanceContract, ClaimableBalanceContractClient, Claimant};
+use crate::contract::{
+    ClaimableBalance, ClaimableBalanceContract, ClaimableBalanceContractClient, Claimant,
+};
 use soroban_sdk::testutils::{Address as _, Ledger};
 use soroban_sdk::{
     token::Client as TokenClient, token::StellarAssetClient as TokenAdminClient, vec, Address, Env,
@@ -69,6 +71,15 @@ fn test_deposit_and_claim_multiple() {
 
     contract.deposit(&admin, &token.address, &claimants.clone());
 
+    assert_eq!(
+        ClaimableBalance {
+            token: token.address.clone(),
+            total_amount: 360,
+            claimants: claimants.clone(),
+        },
+        contract.query_list(&token.address)
+    );
+
     for c in &claimants {
         assert_eq!(token.balance(&c.claimant), 0);
     }
@@ -82,6 +93,14 @@ fn test_deposit_and_claim_multiple() {
     }
 
     assert_eq!(token.balance(&contract.address), 0);
+    assert_eq!(
+        ClaimableBalance {
+            token: token.address.clone(),
+            total_amount: 0,
+            claimants: vec![&env,],
+        },
+        contract.query_list(&token.address)
+    );
 }
 
 #[test]
