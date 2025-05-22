@@ -47,7 +47,7 @@ impl ClaimableBalanceContract {
         if from != env.storage().instance().get(&DataKey::Admin).unwrap() {
             panic!("Only admin can create new claimable balance!");
         }
-        if claimants.len() > 10 {
+        if claimants.len() > 20 {
             panic!("too many claimants");
         }
         from.require_auth();

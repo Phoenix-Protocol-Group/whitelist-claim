@@ -297,6 +297,50 @@ fn test_too_many_claimants_should_fail() {
             claimant: Address::generate(&env),
             amount: 1,
         },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
+        Claimant {
+            claimant: Address::generate(&env),
+            amount: 1,
+        },
     ];
 
     contract.deposit(&admin, &token.address, &claimants);
