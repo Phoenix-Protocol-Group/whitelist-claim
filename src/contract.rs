@@ -1,5 +1,5 @@
 //! Based on: https://developers.stellar.org/docs/glossary/claimable-balance)
-use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Vec};
+use soroban_sdk::{contract, contractimpl, contracttype, token, Address, BytesN, Env, Vec};
 
 #[derive(Clone)]
 #[contracttype]
@@ -133,5 +133,16 @@ impl ClaimableBalanceContract {
             .instance()
             .get(&DataKey::Balance(token.clone()))
             .unwrap()
+    }
+
+    pub fn version() -> u32 {
+        1
+    }
+
+    pub fn upgrade(e: Env, new_wasm_hash: BytesN<32>) {
+        let admin: Address = e.storage().instance().get(&DataKey::Admin).unwrap();
+        admin.require_auth();
+
+        e.deployer().update_current_contract_wasm(new_wasm_hash);
     }
 }
